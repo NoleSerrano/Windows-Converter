@@ -3,7 +3,7 @@ from moviepy.editor import VideoFileClip
 from PIL import Image
 import os
 import sys
-import reg
+import winreg as reg
 
 audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm']
@@ -38,7 +38,6 @@ def remove_conversion_options(media_formats):
             except FileNotFoundError:
                 pass
 
-
 def add_to_registry():
     add_conversion_options(audio_formats)
     add_conversion_options(video_formats)
@@ -70,12 +69,13 @@ def convert_image(file_path, target_format):
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
+# Main Execution Logic
 if __name__ == "__main__":
     if len(sys.argv) == 3:
         file_path = sys.argv[1]
         target_format = sys.argv[2]
-
         file_extension = os.path.splitext(file_path)[1].lower().strip('.')
+
         if file_extension in audio_formats:
             convert_audio(file_path, target_format)
         elif file_extension in video_formats:
@@ -85,4 +85,4 @@ if __name__ == "__main__":
         else:
             print("Unsupported file type or conversion.")
     else:
-        add_to_registry()
+        add_to_registry()  # Run this to setup or remove_from_registry() to clear old entries
