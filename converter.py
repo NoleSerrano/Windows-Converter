@@ -9,7 +9,7 @@ audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm']
 image_formats = ['png', 'jpg']
 
-# -- REGISTRY SETUP -- START
+# -- REGISTRY FUNCTIONS -- START
 def add_conversion_options(media_formats, media_type):
     for format in media_formats:
         key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
@@ -25,7 +25,26 @@ def add_to_registry():
     add_conversion_options(video_formats, "video")
     add_conversion_options(image_formats, "image")
     print("Registry updated successfully.")
-# -- REGISTRY SETUP -- END
+
+def remove_conversion_options(media_formats, media_type):
+    for format in media_formats:
+        key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
+        for target_format in media_formats:
+            if target_format != format:
+                sub_key_path = f"{key_path}\Convert to {target_format}"
+                try:
+                    reg.DeleteKey(reg.HKEY_CLASSES_ROOT, sub_key_path + r'\command')
+                    reg.DeleteKey(reg.HKEY_CLASSES_ROOT, sub_key_path)
+                    print(f"Removed context menu option for .{format} to convert to {target_format}")
+                except FileNotFoundError:
+                    print(f"No entry exists for .{format} to {target_format}")
+
+def remove_from_registry():
+    remove_conversion_options(audio_formats, "audio")
+    remove_conversion_options(video_formats, "video")
+    remove_conversion_options(image_formats, "image")
+    print("Registry entries removed successfully.")
+# -- REGISTRY FUNCTIONS -- END
 
 def convert_audio(file_path, target_format):
     audio = AudioSegment.from_file(file_path)
