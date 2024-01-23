@@ -1,0 +1,2 @@
+* Create an install and uninstall py - which is just removing the registries or adding them
+* Add more formats for conversion
