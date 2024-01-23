@@ -11,32 +11,32 @@ image_formats = ['png', 'jpg']
 
 # -- REGISTRY FUNCTIONS -- START
 def add_conversion_options(media_formats):
-    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+    with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
         for format in media_formats:
-            key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell\Convert"
+            key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{format}\shell\Convert"
             with reg.CreateKey(hkey, key_path) as convert_key:
                 for target_format in media_formats:
-                    sub_key_path = f"{key_path}\{target_format}"
+                    sub_key_path = f"{key_path}\\{target_format}"
                     with reg.CreateKey(hkey, sub_key_path) as subkey:
                         command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1" {target_format}'
                         reg.SetValue(subkey, '', reg.REG_SZ, command)
                         print(f"Added context menu option for .{format} to convert to {target_format}")
 
 def remove_conversion_options(media_formats):
-    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+    with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
         for format in media_formats:
-            key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell\Convert"
+            key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{format}\shell\Convert"
             for target_format in media_formats:
-                sub_key_path = f"{key_path}\{target_format}"
+                sub_key_path = f"{key_path}\\{target_format}"
                 try:
                     reg.DeleteKey(hkey, sub_key_path)
                     print(f"Removed context menu option for .{format} to convert to {target_format}")
                 except FileNotFoundError:
                     print(f"No entry exists for .{format} to {target_format}")
             try:
-                reg.DeleteKey(hkey, key_path)  # Remove the "Convert" key
+                reg.DeleteKey(hkey, key_path)
             except FileNotFoundError:
-                pass  # If the key doesn't exist, no action is needed
+                pass
 
 
 def add_to_registry():
