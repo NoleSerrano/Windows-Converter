@@ -11,33 +11,36 @@ image_formats = ['png', 'jpg']
 
 # -- REGISTRY FUNCTIONS -- START
 def add_conversion_options(media_formats, media_type):
-    for format in media_formats:
-        key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
-        for target_format in media_formats:
-            if target_format != format:
-                sub_key_path = f"{key_path}\Convert to {target_format}"
-                command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1" {target_format}'
-                reg.SetValue(reg.HKEY_CLASSES_ROOT, sub_key_path + r'\command', reg.REG_SZ, command)
-                print(f"Added context menu option for .{format} to convert to {target_format}")
+    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+        for format in media_formats:
+            key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
+            for target_format in media_formats:
+                if target_format != format:
+                    sub_key_path = f"{key_path}\Convert to {target_format}"
+                    with reg.CreateKey(hkey, sub_key_path) as subkey:
+                        command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1" {target_format}'
+                        reg.SetValue(subkey, 'command', reg.REG_SZ, command)
+                        print(f"Added context menu option for .{format} to convert to {target_format}")
+
+def remove_conversion_options(media_formats, media_type):
+    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+        for format in media_formats:
+            key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
+            for target_format in media_formats:
+                if target_format != format:
+                    sub_key_path = f"{key_path}\Convert to {target_format}"
+                    try:
+                        reg.DeleteKey(hkey, sub_key_path + r'\command')
+                        reg.DeleteKey(hkey, sub_key_path)
+                        print(f"Removed context menu option for .{format} to convert to {target_format}")
+                    except FileNotFoundError:
+                        print(f"No entry exists for .{format} to {target_format}")
 
 def add_to_registry():
     add_conversion_options(audio_formats, "audio")
     add_conversion_options(video_formats, "video")
     add_conversion_options(image_formats, "image")
     print("Registry updated successfully.")
-
-def remove_conversion_options(media_formats, media_type):
-    for format in media_formats:
-        key_path = rf"Software\Classes\SystemFileAssociations\.{format}\shell"
-        for target_format in media_formats:
-            if target_format != format:
-                sub_key_path = f"{key_path}\Convert to {target_format}"
-                try:
-                    reg.DeleteKey(reg.HKEY_CLASSES_ROOT, sub_key_path + r'\command')
-                    reg.DeleteKey(reg.HKEY_CLASSES_ROOT, sub_key_path)
-                    print(f"Removed context menu option for .{format} to convert to {target_format}")
-                except FileNotFoundError:
-                    print(f"No entry exists for .{format} to {target_format}")
 
 def remove_from_registry():
     remove_conversion_options(audio_formats, "audio")
