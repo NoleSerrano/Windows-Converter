@@ -7,6 +7,9 @@ import winreg as reg
 from tkinter import Tk, Label, Button, OptionMenu, StringVar
 
 audio_formats = ['mp3']
+video_formats = []
+image_formats = []
+
 # audio_formats = ['mp3', 'wav', 'flac']
 # video_formats = ['mp4', 'mov', 'webm']
 # image_formats = ['png', 'jpg']
@@ -14,25 +17,27 @@ audio_formats = ['mp3']
 
 # -- REGISTRY FUNCTIONS -- START
 def add_to_registry():
-    key_path = r"Software\Classes\*\shell\Convert"
-    command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1"'
-    
-    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
-        with reg.CreateKey(hkey, key_path) as key:
-            reg.SetValue(key, '', reg.REG_SZ, 'Convert')
-            with reg.CreateKey(hkey, f"{key_path}\\command") as command_key:
-                reg.SetValue(command_key, '', reg.REG_SZ, command)
+    for media_type in (audio_formats + video_formats + image_formats):
+        key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert"
+        command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1"'
+        
+        with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
+            with reg.CreateKey(hkey, key_path) as key:
+                reg.SetValue(key, '', reg.REG_SZ, 'Convert')
+                with reg.CreateKey(hkey, f"{key_path}\\command") as command_key:
+                    reg.SetValue(command_key, '', reg.REG_SZ, command)
 
     print("Registry updated successfully.")
 
 def remove_from_registry():
-    try:
-        with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
-            reg.DeleteKey(hkey, r"Software\Classes\*\shell\Convert\command")
-            reg.DeleteKey(hkey, r"Software\Classes\*\shell\Convert")
-        print("Registry entries removed successfully.")
-    except FileNotFoundError:
-        print("The registry entries were not found.")
+    for media_type in (audio_formats + video_formats + image_formats):
+        try:
+            with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
+                reg.DeleteKey(hkey, rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert\command")
+                reg.DeleteKey(hkey, rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert")
+            print(f"Registry entries removed for .{media_type}")
+        except FileNotFoundError:
+            print(f"No registry entries found for .{media_type}")
 # -- REGISTRY FUNCTIONS -- END
 
 def convert_file(file_path, target_format):
