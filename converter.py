@@ -40,15 +40,15 @@ def remove_conversion_options(media_formats):
 
 
 def add_to_registry():
-    add_conversion_options(audio_formats, "audio")
-    add_conversion_options(video_formats, "video")
-    add_conversion_options(image_formats, "image")
+    add_conversion_options(audio_formats)
+    add_conversion_options(video_formats)
+    add_conversion_options(image_formats)
     print("Registry updated successfully.")
 
 def remove_from_registry():
-    remove_conversion_options(audio_formats, "audio")
-    remove_conversion_options(video_formats, "video")
-    remove_conversion_options(image_formats, "image")
+    remove_conversion_options(audio_formats)
+    remove_conversion_options(video_formats)
+    remove_conversion_options(image_formats)
     print("Registry entries removed successfully.")
 # -- REGISTRY FUNCTIONS -- END
 
