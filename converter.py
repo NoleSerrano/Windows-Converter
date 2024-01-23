@@ -96,10 +96,15 @@ def convert_image(file_path, target_format):
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
+# TEST function so know code is working
+def touch(file_path):
+    os.utime(file_path)
+
 # Main Execution Logic
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         file_path = sys.argv[1]
+        touch(file_path)
         open_conversion_gui(file_path)
     else:
         # No file path provided, add to registry
