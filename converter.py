@@ -10,6 +10,7 @@ audio_formats = ['mp3']
 # audio_formats = ['mp3', 'wav', 'flac']
 # video_formats = ['mp4', 'mov', 'webm']
 # image_formats = ['png', 'jpg']
+# Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\SystemFileAssociations\.mp3
 
 # -- REGISTRY FUNCTIONS -- START
 def add_to_registry():
