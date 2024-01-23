@@ -5,6 +5,7 @@ import os
 import sys
 import winreg as reg
 from tkinter import Tk, Label, Button, OptionMenu, StringVar
+import tkinter as tk
 
 audio_formats = ['mp3']
 video_formats = []
@@ -77,6 +78,7 @@ def open_conversion_gui(file_path):
     root.mainloop()
 
 
+
 # old conversion functions
 def convert_audio(file_path, target_format):
     audio = AudioSegment.from_file(file_path)
@@ -100,12 +102,33 @@ def convert_image(file_path, target_format):
 def touch(file_path):
     os.utime(file_path)
 
+def on_button_click():
+    label.config(text="Button clicked!")
+
+def gui():
+    # Create the main window
+    root = tk.Tk()
+    root.title("GUI Test")
+
+    # Create a label
+    global label
+    label = tk.Label(root, text="Hello, Tkinter!")
+    label.pack()
+
+    # Create a button
+    button = tk.Button(root, text="Click Me", command=on_button_click)
+    button.pack()
+
+    # Start the event loop
+    root.mainloop()
+
 # Main Execution Logic
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         file_path = sys.argv[1]
         touch(file_path)
-        open_conversion_gui(file_path)
+        # open_conversion_gui(file_path)
+        gui()
     else:
         # No file path provided, add to registry
         add_to_registry()  # Run this to setup or remove_from_registry() to clear old entries
