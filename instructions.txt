@@ -1,1 +1,1 @@
-Must run in admin for setup - setup currently is just running the converter file.
+Admin not needed for setup apparently if just in current user for setup
