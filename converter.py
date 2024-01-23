@@ -4,85 +4,74 @@ from PIL import Image
 import os
 import sys
 import winreg as reg
+from tkinter import Tk, Label, Button, OptionMenu, StringVar
 
-audio_formats = ['mp3', 'wav']
+audio_formats = ['mp3']
 # audio_formats = ['mp3', 'wav', 'flac']
 # video_formats = ['mp4', 'mov', 'webm']
 # image_formats = ['png', 'jpg']
 
 # -- REGISTRY FUNCTIONS -- START
-def add_conversion_options(media_formats):
-    with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
-        for format in media_formats:
-            # Set up the 'Convert' submenu
-            key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{format}\shell\Convert"
-            with reg.CreateKey(hkey, key_path) as convert_key:
-                # Set the default value for the submenu (displayed verb)
-                reg.SetValue(convert_key, '', reg.REG_SZ, 'Convert')
-                # Indicate that this key has subcommands
-                reg.SetValue(convert_key, 'subcommands', reg.REG_SZ, '')
-
-                # Set up the conversion options
-                for target_format in media_formats:
-                    # Create a key for the subcommand
-                    sub_key_path = f"{key_path}\\shell\\to{target_format.upper()}"
-                    with reg.CreateKey(hkey, sub_key_path) as subkey:
-                        # Create the command key and set the command
-                        command_key_path = f"{sub_key_path}\\command"
-                        with reg.CreateKey(hkey, command_key_path) as command_key:
-                            command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1" {target_format}'
-                            reg.SetValue(command_key, '', reg.REG_SZ, command)
-                            print(f"Added context menu option for .{format} to convert to {target_format}")
-
-
-def remove_conversion_options(media_formats):
-    with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
-        for format in media_formats:
-            # Define the base path for the 'Convert' submenu
-            convert_key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{format}\shell\Convert"
-
-            # Attempt to remove subcommands for each target format
-            for target_format in media_formats:
-                sub_key_path = f"{convert_key_path}\\shell\\to{target_format.upper()}"
-                command_key_path = f"{sub_key_path}\\command"
-                try:
-                    # Remove the 'command' subkey
-                    reg.DeleteKey(hkey, command_key_path)
-                except FileNotFoundError:
-                    print(f"No command key to remove for {format} to {target_format}")
-                
-                try:
-                    # Remove the format subkey (e.g., 'toMP3')
-                    reg.DeleteKey(hkey, sub_key_path)
-                except FileNotFoundError:
-                    print(f"No sub key to remove for {format} to {target_format}")
-
-            try:
-                # Remove the 'shell' subkey under the 'Convert' key
-                shell_key_path = f"{convert_key_path}\\shell"
-                reg.DeleteKey(hkey, shell_key_path)
-            except FileNotFoundError:
-                print(f"No shell key to remove under {convert_key_path}")
-                
-            try:
-                # Finally, remove the 'Convert' key itself
-                reg.DeleteKey(hkey, convert_key_path)
-            except FileNotFoundError:
-                print(f"No Convert key to remove for {format}")
-
 def add_to_registry():
-    add_conversion_options(audio_formats)
-    # add_conversion_options(video_formats)
-    # add_conversion_options(image_formats)
+    key_path = r"Software\Classes\*\shell\Convert"
+    command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1"'
+    
+    with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+        with reg.CreateKey(hkey, key_path) as key:
+            reg.SetValue(key, '', reg.REG_SZ, 'Convert')
+            with reg.CreateKey(hkey, f"{key_path}\\command") as command_key:
+                reg.SetValue(command_key, '', reg.REG_SZ, command)
+
     print("Registry updated successfully.")
 
 def remove_from_registry():
-    remove_conversion_options(audio_formats)
-    # remove_conversion_options(video_formats)
-    # remove_conversion_options(image_formats)
-    print("Registry entries removed successfully.")
+    try:
+        with reg.ConnectRegistry(None, reg.HKEY_CURRENT_USER) as hkey:
+            reg.DeleteKey(hkey, r"Software\Classes\*\shell\Convert\command")
+            reg.DeleteKey(hkey, r"Software\Classes\*\shell\Convert")
+        print("Registry entries removed successfully.")
+    except FileNotFoundError:
+        print("The registry entries were not found.")
 # -- REGISTRY FUNCTIONS -- END
 
+def convert_file(file_path, target_format):
+    print(f"Converting {file_path} to {target_format}")
+    # Add your conversion logic here
+
+# Tkinter GUI for Conversion
+def open_conversion_gui(file_path):
+    root = Tk()
+    root.title("Convert File")
+
+    Label(root, text="Choose format to convert to:").pack()
+
+    # Combine all formats and remove the original format from the list
+    all_formats = list(set(audio_formats))
+    original_format = os.path.splitext(file_path)[1].lstrip('.').lower()
+    try:
+        all_formats.remove(original_format)
+    except ValueError:
+        pass  # Original format is not in the list
+
+    # StringVar to hold the selected format
+    selected_format = StringVar(root)
+    selected_format.set(all_formats[0])  # default value
+
+    # Dropdown menu for format selection
+    OptionMenu(root, selected_format, *all_formats).pack()
+
+    # Function to call conversion logic and close GUI
+    def on_convert():
+        convert_file(file_path, selected_format.get())
+        root.destroy()
+
+    # Convert button
+    Button(root, text="Convert", command=on_convert).pack()
+
+    root.mainloop()
+
+
+# old conversion functions
 def convert_audio(file_path, target_format):
     audio = AudioSegment.from_file(file_path)
     output_file = f"{os.path.splitext(file_path)[0]}.{target_format}"
@@ -103,18 +92,9 @@ def convert_image(file_path, target_format):
 
 # Main Execution Logic
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 2:
         file_path = sys.argv[1]
-        target_format = sys.argv[2]
-        file_extension = os.path.splitext(file_path)[1].lower().strip('.')
-
-        if file_extension in audio_formats:
-            convert_audio(file_path, target_format)
-        elif file_extension in video_formats:
-            convert_video(file_path, target_format)
-        elif file_extension in image_formats:
-            convert_image(file_path, target_format)
-        else:
-            print("Unsupported file type or conversion.")
+        open_conversion_gui(file_path)
     else:
+        # No file path provided, add to registry
         add_to_registry()  # Run this to setup or remove_from_registry() to clear old entries
