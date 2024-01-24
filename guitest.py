@@ -10,21 +10,35 @@ audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm']
 image_formats = ['png', 'jpg', 'bmp']
 
-def convert_audio(file_path, target_format):
+def get_unique_filename(base_path, ext):
+    counter = 1
+    new_path = f"{base_path} ({counter}).{ext}"
+    while os.path.exists(new_path):
+        counter += 1
+        new_path = f"{base_path} ({counter}).{ext}"
+    return new_path
+
+def get_output_filename(file_path, target_format):
+    base = os.path.splitext(file_path)[0]
+    output_file = f"{base}.{target_format}"
+    # If the target file already exists, create a unique filename
+    if os.path.exists(output_file):
+        return get_unique_filename(base, target_format)
+
+    return output_file
+    
+def convert_audio(file_path, target_format, output_file):
     audio = AudioSegment.from_file(file_path)
-    output_file = f"{os.path.splitext(file_path)[0]}.{target_format}"
     audio.export(output_file, format=target_format)
     print(f"Audio file converted successfully: {output_file}")
 
-def convert_video(file_path, target_format):
+def convert_video(file_path, target_format, output_file):
     video = VideoFileClip(file_path)
-    output_file = f"{os.path.splitext(file_path)[0]}.{target_format}"
     video.write_videofile(output_file)
     print(f"Video file converted successfully: {output_file}")
 
-def convert_image(file_path, target_format):
+def convert_image(file_path, target_format, output_file):
     image = Image.open(file_path)
-    output_file = f"{os.path.splitext(file_path)[0]}.{target_format}"
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
@@ -41,12 +55,14 @@ def get_conversion_options(file_path):
 
 def convert_file(file_path, target_format):
     ext = os.path.splitext(file_path)[1].lower()
+    output_file = get_output_filename(file_path, target_format)
+    print(output_file)
     if ext in ['.mp3', '.wav', '.flac']:
-        convert_audio(file_path, target_format)
+        convert_audio(file_path, target_format, output_file)
     elif ext in ['.mp4', '.mov', '.webm']:
-        convert_video(file_path, target_format)
+        convert_video(file_path, target_format, output_file)
     elif ext in ['.png', '.jpg', '.bmp']:
-        convert_image(file_path, target_format)
+        convert_image(file_path, target_format, output_file)
     else:
         print("Unsupported file format for conversion.")
 
