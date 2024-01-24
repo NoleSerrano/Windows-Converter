@@ -16,31 +16,6 @@ audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm']
 image_formats = ['png', 'jpg', 'bmp']
 
-# -- REGISTRY FUNCTIONS -- START
-def add_to_registry():
-    for media_type in (audio_formats + video_formats + image_formats):
-        key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert"
-        command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1"'
-        
-        with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
-            with reg.CreateKey(hkey, key_path) as key:
-                reg.SetValue(key, '', reg.REG_SZ, 'Convert')
-                with reg.CreateKey(hkey, f"{key_path}\\command") as command_key:
-                    reg.SetValue(command_key, '', reg.REG_SZ, command)
-
-    print("Registry updated successfully.")
-
-def remove_from_registry():
-    for media_type in (audio_formats + video_formats + image_formats):
-        try:
-            with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
-                reg.DeleteKey(hkey, rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert\command")
-                reg.DeleteKey(hkey, rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert")
-            print(f"Registry entries removed for .{media_type}")
-        except FileNotFoundError:
-            print(f"No registry entries found for .{media_type}")
-# -- REGISTRY FUNCTIONS -- END
-
 def get_unique_filename(base_path, ext):
     counter = 1
     new_path = f"{base_path} ({counter}).{ext}"
@@ -128,9 +103,6 @@ def touch(file_path):
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         file_path = sys.argv[1]
-        touch(file_path)
+        # touch(file_path)
         # open_conversion_gui(file_path)
         open_conversion_gui(file_path)
-    else:
-        # No file path provided, add to registry
-        add_to_registry()  # Run this to setup or remove_from_registry() to clear old entries
