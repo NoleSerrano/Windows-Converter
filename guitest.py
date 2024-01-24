@@ -32,12 +32,12 @@ def convert_audio(file_path, target_format, output_file):
     audio.export(output_file, format=target_format)
     print(f"Audio file converted successfully: {output_file}")
 
-def convert_video(file_path, target_format, output_file):
+def convert_video(file_path, output_file):
     video = VideoFileClip(file_path)
     video.write_videofile(output_file)
     print(f"Video file converted successfully: {output_file}")
 
-def convert_image(file_path, target_format, output_file):
+def convert_image(file_path, output_file):
     image = Image.open(file_path)
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
@@ -46,11 +46,11 @@ def convert_file(file_path, target_format):
     ext = os.path.splitext(file_path)[1].lower()
     output_file = get_output_filename(file_path, target_format)
     print(output_file)
-    if ext in ['.mp3', '.wav', '.flac']:
+    if ext in audio_formats:
         convert_audio(file_path, target_format, output_file)
-    elif ext in ['.mp4', '.mov', '.webm']:
+    elif ext in video_formats:
         convert_video(file_path, target_format, output_file)
-    elif ext in ['.png', '.jpg', '.bmp']:
+    elif ext in image_formats:
         convert_image(file_path, target_format, output_file)
     else:
         print("Unsupported file format for conversion.")

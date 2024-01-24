@@ -16,6 +16,19 @@ audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm']
 image_formats = ['png', 'jpg', 'bmp']
 
+def add_to_registry():
+    for media_type in (audio_formats + video_formats + image_formats):
+        key_path = rf"SOFTWARE\Classes\SystemFileAssociations\.{media_type}\shell\Convert"
+        command = f'"{sys.executable}" "{os.path.abspath(__file__)}" "%1"'
+        
+        with reg.ConnectRegistry(None, reg.HKEY_LOCAL_MACHINE) as hkey:
+            with reg.CreateKey(hkey, key_path) as key:
+                reg.SetValue(key, '', reg.REG_SZ, 'Convert')
+                with reg.CreateKey(hkey, f"{key_path}\\command") as command_key:
+                    reg.SetValue(command_key, '', reg.REG_SZ, command)
+
+    print("Registry updated successfully.")
+
 def get_unique_filename(base_path, ext):
     counter = 1
     new_path = f"{base_path} ({counter}).{ext}"
@@ -38,12 +51,12 @@ def convert_audio(file_path, target_format, output_file):
     audio.export(output_file, format=target_format)
     print(f"Audio file converted successfully: {output_file}")
 
-def convert_video(file_path, target_format, output_file):
+def convert_video(file_path, output_file):
     video = VideoFileClip(file_path)
     video.write_videofile(output_file)
     print(f"Video file converted successfully: {output_file}")
 
-def convert_image(file_path, target_format, output_file):
+def convert_image(file_path, output_file):
     image = Image.open(file_path)
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
@@ -52,11 +65,11 @@ def convert_file(file_path, target_format):
     ext = os.path.splitext(file_path)[1].lower()
     output_file = get_output_filename(file_path, target_format)
     print(output_file)
-    if ext in ['.mp3', '.wav', '.flac']:
+    if ext in audio_formats:
         convert_audio(file_path, target_format, output_file)
-    elif ext in ['.mp4', '.mov', '.webm']:
+    elif ext in video_formats:
         convert_video(file_path, target_format, output_file)
-    elif ext in ['.png', '.jpg', '.bmp']:
+    elif ext in image_formats:
         convert_image(file_path, target_format, output_file)
     else:
         print("Unsupported file format for conversion.")
@@ -106,3 +119,5 @@ if __name__ == "__main__":
         # touch(file_path)
         # open_conversion_gui(file_path)
         open_conversion_gui(file_path)
+    else:
+        add_to_registry()

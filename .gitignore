@@ -16,3 +16,7 @@
 *.webm
 *.mov
 *.ts
+
+# Folders
+/__pycache__/
+*.pyc
