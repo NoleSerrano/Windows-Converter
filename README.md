@@ -15,5 +15,5 @@ any errors that show up.
 - `pip install pydub moviepy Pillow`
 - Download ffmpeg and add the path to the ffmpeg.exe file to your system's PATH environment variable
 
-### Notes
+## Notes
 Not all the formats have been added but do want to add them in the future.
