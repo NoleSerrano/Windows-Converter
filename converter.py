@@ -58,6 +58,10 @@ def convert_video(file_path, output_file):
 
 def convert_image(file_path, output_file):
     image = Image.open(file_path)
+    # If the image has an alpha channel, convert it to RGB
+    if image.mode == 'RGBA':
+        image = image.convert('RGB')
+        
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
@@ -70,9 +74,9 @@ def convert_file(file_path, target_format):
     if ext in audio_formats:
         convert_audio(file_path, target_format, output_file)
     elif ext in video_formats:
-        convert_video(file_path, target_format, output_file)
+        convert_video(file_path, output_file)
     elif ext in image_formats:
-        convert_image(file_path, target_format, output_file)
+        convert_image(file_path, output_file)
     else:
         print("Unsupported file format for conversion.")
 
