@@ -42,17 +42,6 @@ def convert_image(file_path, target_format, output_file):
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
-def get_conversion_options(file_path):
-    ext = os.path.splitext(file_path)[1].lower()
-    if ext in ['.mp3', '.wav', '.flac']:
-        return [fmt for fmt in audio_formats if f".{fmt}" != ext]
-    elif ext in ['.mp4', '.mov', '.webm']:
-        return [fmt for fmt in video_formats if f".{fmt}" != ext]
-    elif ext in ['.png', '.jpg', '.bmp']:
-        return [fmt for fmt in image_formats if f".{fmt}" != ext]
-    else:
-        return []
-
 def convert_file(file_path, target_format):
     ext = os.path.splitext(file_path)[1].lower()
     output_file = get_output_filename(file_path, target_format)
@@ -70,9 +59,16 @@ def open_conversion_gui(file_path):
     root = tk.Tk()
     root.title("Convert File")
 
-    conversion_options = get_conversion_options(file_path)
-    if not conversion_options:
-        label = tk.Label(root, text="No available formats for conversion.")
+    # Determine the file type based on its extension
+    ext = os.path.splitext(file_path)[1].lower().lstrip('.')
+    if ext in audio_formats:
+        conversion_options = audio_formats
+    elif ext in video_formats:
+        conversion_options = video_formats
+    elif ext in image_formats:
+        conversion_options = image_formats
+    else:
+        label = tk.Label(root, text="Unsupported file format for conversion.")
         label.pack()
         return
 
@@ -80,7 +76,8 @@ def open_conversion_gui(file_path):
     label.pack()
 
     selected_format = StringVar(root)
-    selected_format.set(conversion_options[0])
+    selected_format.set(conversion_options[0])  # Set default value
+
     format_menu = OptionMenu(root, selected_format, *conversion_options)
     format_menu.pack()
 
