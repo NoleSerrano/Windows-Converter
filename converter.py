@@ -53,7 +53,7 @@ def convert_audio(file_path, target_format, output_file):
 
 def convert_video(file_path, output_file):
     video = VideoFileClip(file_path)
-    video.write_videofile(output_file)
+    video.write_videofile(output_file, codec='libx264')
     print(f"Video file converted successfully: {output_file}")
 
 def convert_image(file_path, output_file):
@@ -61,7 +61,7 @@ def convert_image(file_path, output_file):
     # If the image has an alpha channel, convert it to RGB
     if image.mode == 'RGBA':
         image = image.convert('RGB')
-        
+
     image.save(output_file)
     print(f"Image file converted successfully: {output_file}")
 
