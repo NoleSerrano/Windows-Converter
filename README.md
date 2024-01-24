@@ -1,4 +1,4 @@
-# Windows Converter
+# Windows File Converter
 This tool converts file formats to other files. For instance, converting .wav files to .mp3. You won't need any annoying online converters that not only take longer but also cap you on how many conversions you can do.
 
 ## Installation
