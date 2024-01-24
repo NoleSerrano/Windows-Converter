@@ -62,9 +62,11 @@ def convert_image(file_path, output_file):
     print(f"Image file converted successfully: {output_file}")
 
 def convert_file(file_path, target_format):
-    ext = os.path.splitext(file_path)[1].lower()
+    print("Converting")
+    ext = os.path.splitext(file_path)[1].lower().lstrip('.')  # Strip the dot from the extension
     output_file = get_output_filename(file_path, target_format)
     print(output_file)
+    
     if ext in audio_formats:
         convert_audio(file_path, target_format, output_file)
     elif ext in video_formats:
