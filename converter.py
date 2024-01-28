@@ -12,8 +12,8 @@ import tkinter as tk
 # image_formats = []
 # Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\SystemFileAssociations\.mp3
 
-audio_formats = ['mp3', 'wav', 'flac']
-video_formats = ['mp4', 'mov', 'webm']
+audio_formats = ['mp3', 'wav', 'flac', 'm4a']
+video_formats = ['mp4', 'mov', 'webm', 'mkv']
 image_formats = ['png', 'jpg', 'bmp']
 
 def add_to_registry():
