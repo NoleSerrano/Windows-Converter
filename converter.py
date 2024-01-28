@@ -12,7 +12,7 @@ import tkinter as tk
 # image_formats = []
 # Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\SystemFileAssociations\.mp3
 
-audio_formats = ['mp3', 'wav', 'flac', 'm4a']
+audio_formats = ['mp3', 'wav', 'flac']
 video_formats = ['mp4', 'mov', 'webm', 'mkv']
 image_formats = ['png', 'jpg', 'bmp']
 
@@ -53,7 +53,27 @@ def convert_audio(file_path, target_format, output_file):
 
 def convert_video(file_path, output_file):
     video = VideoFileClip(file_path)
-    video.write_videofile(output_file, codec='libx264')
+    
+    # Determine the codec based on the output file extension
+    _, ext = os.path.splitext(output_file)
+    ext = ext.lower()
+
+    if ext == '.mp4' or ext == '.mov':
+        video_codec = 'libx264'
+        audio_codec = 'aac'
+    elif ext == '.webm':
+        video_codec = 'libvpx'
+        audio_codec = 'libvorbis'
+    elif ext == '.ogv':
+        video_codec = 'libtheora'
+        audio_codec = 'libvorbis'
+    elif ext == '.mkv':
+        video_codec = 'libx264'
+        audio_codec = 'aac'
+    else:
+        raise ValueError(f"Unsupported file extension: {ext}")
+
+    video.write_videofile(output_file, codec=video_codec, audio_codec=audio_codec)
     print(f"Video file converted successfully: {output_file}")
 
 def convert_image(file_path, output_file):

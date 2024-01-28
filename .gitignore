@@ -10,11 +10,13 @@
 # Image
 *.png
 *.jpg
+*.bmp
 
 # Video Files
 *.mp4
 *.webm
 *.mov
+*.mkv
 *.ts
 
 # Folders
