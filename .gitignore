@@ -6,6 +6,8 @@
 *.wav
 *.mp3
 *.flac
+*.m4a
+*.ogg
 
 # Image
 *.png
@@ -22,3 +24,5 @@
 # Folders
 /__pycache__/
 *.pyc
+*.m4a
+*.ogg
