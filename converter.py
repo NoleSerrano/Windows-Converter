@@ -6,15 +6,29 @@ import sys
 import winreg as reg
 from tkinter import Tk, Label, Button, OptionMenu, StringVar
 import tkinter as tk
+import ctypes
 
 # audio_formats = ['mp3']
 # video_formats = []
 # image_formats = []
 # Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\SystemFileAssociations\.mp3
 
-audio_formats = ['mp3', 'wav', 'flac', 'opus']
+audio_formats = ['mp3', 'wav', 'flac', 'opus', 'm4a']
 video_formats = ['mp4', 'mov', 'webm', 'mkv']
 image_formats = ['png', 'jpg', 'bmp']
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+def run_script_as_admin():
+    script = os.path.abspath(sys.argv[0])
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, script, None, 1)
+
+def wait_for_exit():
+    input("Press Enter to exit...")
 
 def add_to_registry():
     for media_type in (audio_formats + video_formats + image_formats):
@@ -146,4 +160,9 @@ if __name__ == "__main__":
         # open_conversion_gui(file_path)
         open_conversion_gui(file_path)
     else:
-        add_to_registry()
+        if not is_admin():
+            run_script_as_admin()
+            sys.exit(0)
+        else:
+            add_to_registry()
+            wait_for_exit()

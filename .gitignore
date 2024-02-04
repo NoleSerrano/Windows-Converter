@@ -8,6 +8,7 @@
 *.flac
 *.m4a
 *.ogg
+*.m4a
 
 # Image
 *.png
